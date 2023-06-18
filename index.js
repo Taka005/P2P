@@ -1,29 +1,27 @@
 const net = require("net");
 const readline = require("readline");
 
-const PORT = 2000;
-const PORT2 = 3000;
-
-const addresses = new Set();
+const config = require("./config.json");
+const crypto = require("./lib/crypto");
 
 const server = net.createServer((socket)=>{
   if(!addresses.has(socket.remoteAddress)){
     addresses.add(socket.remoteAddress);
     console.log(`新しいノードが接続しました: ${socket.remoteAddress}`);
   }
-  console.log(addresses)
+  
+  socket.on("data",(_data)=>{
+    const data = crypto.decode(_data.toString().trim(),config.key||"NONE");
+    if(!data) return;
 
-  socket.on("data",(data)=>{
-    const message = data.toString().trim();
+    if(data.event === "ADD_REQUEST"){
+
+    }
     console.log(`メッセージを受信しました: ${message} (${socket.remoteAddress})`);
-  });
-
-  socket.on("close",()=>{
-    console.log(`ノードが切断されました: ${socket.remoteAddress}`);
   });
 });
 
-server.listen(PORT,()=>{
+server.listen(config.port,()=>{
   console.log("P2Pネットワークが開始されました");
 });
 
