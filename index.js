@@ -13,7 +13,7 @@ const server = net.createServer((socket)=>{
 
     if(data.event === "ADD_REQUEST"){
       try{
-        const client = net.connect({ host: socket.remoteAddress, port: config.port });
+        const client = net.connect({ host: socket.remoteAddress, port: config.subport });
         client.write(DataBuilder("ADD_REQUEST_ACCEPT"));
         client.end();
 
@@ -37,7 +37,7 @@ server.listen(config.port,()=>{
 function AddAddressRequest(address){
   if(AddressManager.has(address)) return console.log("指定されたアドレスは既に登録されています");
   try{
-    const client = net.connect({ host: address, port: config.port });
+    const client = net.connect({ host: address, port: config.subport });
     client.write(DataBuilder("ADD_REQUEST"));
     client.end();
   }catch{
@@ -48,7 +48,7 @@ function AddAddressRequest(address){
 function SendMessage(message){
   AddressManager.data.forEach((address)=>{
     try{
-      const client = net.connect({ host: address, port: config.port });
+      const client = net.connect({ host: address, port: config.subport });
       client.write(DataBuilder("SEND_MESSAGE",{
         content: message
       }));
