@@ -80,7 +80,7 @@ rl.on("line",(line)=>{
   if(command.startsWith("m ")){
     SendMessage(command.substring(2).trim());
   }else if(command === "l"){
-    ShowAddress();
+    ShowAddresses();
   }else if(command === "q"){
     server.close();
     rl.close();
