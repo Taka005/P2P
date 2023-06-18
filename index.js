@@ -4,7 +4,7 @@ const readline = require("readline");
 const config = require("./config.json");
 const crypto = require("./lib/crypto");
 const AddressManager = require("./lib/AddressManager");
-const DataBuilder = require("./DataBuilder");
+const DataBuilder = require("./lib/DataBuilder");
 
 const server = net.createServer((socket)=>{
   socket.on("data",(_data)=>{
