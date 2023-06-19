@@ -102,3 +102,11 @@ rl.on("line",(line)=>{
   console.log("P2Pネットワークを終了します");
   process.exit(0);
 });
+
+process.on("uncaughtException",async(error)=>{
+  console.log(error.stack);
+});
+
+process.on("unhandledRejection",async(error)=>{
+  console.log(error.stack);
+});
