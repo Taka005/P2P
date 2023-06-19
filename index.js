@@ -1,5 +1,3 @@
-process.env.NODE_ENV = "production";
-
 const net = require("net");
 const readline = require("readline");
 
@@ -32,9 +30,6 @@ const server = net.createServer((socket)=>{
     }
   });
 
-  socket.on("error",(error)=>{
-    console.log(error);
-  });
 });
 
 server.listen(config.port,()=>{
@@ -61,7 +56,7 @@ function SendMessage(message){
       }));
       client.end();
     }catch{
-      //AddressManager.delete(address);
+      
     }
   });
 }
@@ -78,21 +73,25 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-rl.setPrompt("コマンドを入力してください (m: メッセージ送信, l: ノード一覧表示, add: 外部ノード追加, q: 終了): ");
+console.log("helpと入力してコマンド一覧を表示");
+
+rl.setPrompt("コマンドを入力: ");
 rl.prompt();
 
 rl.on("line",(line)=>{
   const command = line.trim();
 
-  if(command.startsWith("m ")){
-    SendMessage(command.substring(2).trim());
-  }else if(command === "l"){
+  if(command.startsWith("send ")){
+    SendMessage(command.substring(5).trim());
+  }else if(command === "list"){
     ShowAddresses();
-  }else if(command === "q"){
+  }else if(command === "quit"){
     server.close();
     rl.close();
   }else if(command.startsWith("add ")){
     AddAddressRequest(command.substring(4).trim());
+  }else if(command === "help"){
+    console.log("send: メッセージ送信, list: ノード一覧表示, add: 外部ノード追加, quit: 終了");
   }else{
     console.log("無効なコマンドです");
   }
