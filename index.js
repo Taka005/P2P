@@ -1,48 +1,74 @@
+process.env.NODE_ENV = "production";
+
 const net = require("net");
 const readline = require("readline");
 
-const PORT = 2000;
-const PORT2 = 3000;
-
-const addresses = new Set();
+const config = require("./config.json");
+const crypto = require("./lib/crypto");
+const AddressManager = require("./lib/AddressManager");
+const DataBuilder = require("./lib/DataBuilder");
 
 const server = net.createServer((socket)=>{
-  if(!addresses.has(socket.remoteAddress)){
-    addresses.add(socket.remoteAddress);
-    console.log(`新しいノードが接続しました: ${socket.remoteAddress}`);
-  }
-  console.log(addresses)
+  socket.on("data",(_data)=>{
+    const data = crypto.decode(_data.toString().trim(),config.key||"NONE");
+    if(!data) return;
 
-  socket.on("data",(data)=>{
-    const message = data.toString().trim();
-    console.log(`メッセージを受信しました: ${message} (${socket.remoteAddress})`);
+    if(data.event === "ADD_REQUEST"){
+      try{
+        const client = net.connect({ host: socket.remoteAddress, port: config.subport });
+        client.write(DataBuilder("ADD_REQUEST_ACCEPT"));
+        client.end();
+
+        AddressManager.add(socket.remoteAddress);
+        console.log(`${data.client.UserName}(${socket.remoteAddress})が追加されました`);
+      }catch{
+        console.log("追加申請を承諾出来ませんでした");
+      }
+    }else if(data.event === "ADD_REQUEST_ACCEPT"){
+      AddressManager.add(socket.remoteAddress);
+      console.log(`${data.client.UserName}(${socket.remoteAddress})が追加されました`);
+    }else if(data.event === "SEND_MESSAGE"){
+      console.log(`${data.client.UserName}(${socket.remoteAddress}): ${data.data.content}`);
+    }
   });
 
-  socket.on("close",()=>{
-    console.log(`ノードが切断されました: ${socket.remoteAddress}`);
+  socket.on("error",(error)=>{
+    console.log(error);
   });
 });
 
-server.listen(PORT,()=>{
+server.listen(config.port,()=>{
   console.log("P2Pネットワークが開始されました");
 });
 
-function addExternalAddress(address){
-  addresses.add(address);
-  console.log(`外部ノードが追加されました: ${address}`);
+function AddAddressRequest(address){
+  if(AddressManager.has(address)) return console.log("指定されたアドレスは既に登録されています");
+  try{
+    const client = net.connect({ host: address, port: config.subport });
+    client.write(DataBuilder("ADD_REQUEST"));
+    client.end();
+  }catch{
+    console.log("指定されたアドレスに追加申請を送ることが出来ませんでした");
+  }
 }
 
-function sendMessage(message){
-  addresses.forEach((address)=>{
-    const client = net.connect({ host: address, port: PORT2 });
-    client.write(message);
-    client.end();
+function SendMessage(message){
+  AddressManager.data.forEach((address)=>{
+    try{
+      const client = net.connect({ host: address, port: config.subport });
+      client.write(DataBuilder("SEND_MESSAGE",{
+        content: message
+      }));
+      client.end();
+    }catch{
+      //AddressManager.delete(address);
+    }
   });
 }
 
-function showAddress(){
+function ShowAddresses(){
   console.log("接続中のノード一覧:");
-  addresses.forEach((address)=>{
+  AddressManager.data.forEach((address)=>{
     console.log(address);
   });
 }
@@ -52,21 +78,21 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-rl.setPrompt("コマンドを入力してください (m: メッセージ送信, p: ノード一覧表示, add: 外部ノード追加, q: 終了): ");
+rl.setPrompt("コマンドを入力してください (m: メッセージ送信, l: ノード一覧表示, add: 外部ノード追加, q: 終了): ");
 rl.prompt();
 
 rl.on("line",(line)=>{
   const command = line.trim();
 
   if(command.startsWith("m ")){
-    sendMessage(command.substring(2).trim());
-  }else if(command === "p"){
-    showAddress();
+    SendMessage(command.substring(2).trim());
+  }else if(command === "l"){
+    ShowAddresses();
   }else if(command === "q"){
     server.close();
     rl.close();
   }else if(command.startsWith("add ")){
-    addExternalAddress(command.substring(4).trim());
+    AddAddressRequest(command.substring(4).trim());
   }else{
     console.log("無効なコマンドです");
   }
