@@ -73,9 +73,10 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+console.log("helpと入力してコマンド一覧を表示");
+
 rl.setPrompt("コマンドを入力: ");
 rl.prompt();
-console.log("helpと入力してコマンド一覧を表示");
 
 rl.on("line",(line)=>{
   const command = line.trim();
