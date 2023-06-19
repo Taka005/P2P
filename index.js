@@ -90,7 +90,7 @@ rl.on("line",(line)=>{
   }else if(command.startsWith("add ")){
     AddAddressRequest(command.substring(4).trim());
   }else if(command === "help"){
-    console.log("send: メッセージ送信, list: ノード一覧表示, add: 外部ノード追加, quit: 終了")
+    console.log("send: メッセージ送信, list: ノード一覧表示, add: 外部ノード追加, quit: 終了");
   }else{
     console.log("無効なコマンドです");
   }
