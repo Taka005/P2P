@@ -1,6 +1,8 @@
 const net = require("net");
 const readline = require("readline");
 
+require("./lib/FileCheck")();
+
 const config = require("./config.json");
 const crypto = require("./lib/crypto");
 const AddressManager = require("./lib/AddressManager");
@@ -13,7 +15,7 @@ const server = net.createServer((socket)=>{
 
     if(data.event === "ADD_REQUEST"){
       try{
-        const client = net.connect({ host: socket.remoteAddress, port: config.subport });
+        const client = net.connect({ host: socket.remoteAddress, port: config.ClientPort });
         client.write(DataBuilder("ADD_REQUEST_ACCEPT"));
         client.end();
 
@@ -32,14 +34,14 @@ const server = net.createServer((socket)=>{
 
 });
 
-server.listen(config.port,()=>{
+server.listen(config.ServerPort,()=>{
   console.log("P2Pネットワークが開始されました");
 });
 
 function AddAddressRequest(address){
   if(AddressManager.has(address)) return console.log("指定されたアドレスは既に登録されています");
   try{
-    const client = net.connect({ host: address, port: config.subport });
+    const client = net.connect({ host: address, port: config.ClientPort });
     client.write(DataBuilder("ADD_REQUEST"));
     client.end();
   }catch{
@@ -50,7 +52,7 @@ function AddAddressRequest(address){
 function SendMessage(message){
   AddressManager.data.forEach((address)=>{
     try{
-      const client = net.connect({ host: address, port: config.subport });
+      const client = net.connect({ host: address, port: config.ClientPort });
       client.write(DataBuilder("SEND_MESSAGE",{
         content: message
       }));
