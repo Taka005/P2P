@@ -1,3 +1,5 @@
+process.env.NODE_ENV = "production";
+
 const net = require("net");
 const readline = require("readline");
 
@@ -9,7 +11,6 @@ const DataBuilder = require("./lib/DataBuilder");
 const server = net.createServer((socket)=>{
   socket.on("data",(_data)=>{
     const data = crypto.decode(_data.toString().trim(),config.key||"NONE");
-    console.log(data);
     if(!data) return;
 
     if(data.event === "ADD_REQUEST"){
@@ -19,6 +20,7 @@ const server = net.createServer((socket)=>{
         client.end();
 
         AddressManager.add(socket.remoteAddress);
+        console.log(`${data.client.UserName}(${socket.remoteAddress})が追加されました`);
       }catch{
         console.log("追加申請を承諾出来ませんでした");
       }
