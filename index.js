@@ -28,6 +28,10 @@ const server = net.createServer((socket)=>{
       console.log(`${data.client.UserName}(${socket.remoteAddress}): ${data.data.content}`);
     }
   });
+
+  socket.on("error",(error)=>{
+    console.log(error);
+  });
 });
 
 server.listen(config.port,()=>{
