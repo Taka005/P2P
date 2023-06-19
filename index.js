@@ -1,5 +1,3 @@
-process.env.NODE_ENV = "production";
-
 const net = require("net");
 const readline = require("readline");
 
