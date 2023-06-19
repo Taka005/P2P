@@ -24,7 +24,7 @@ const server = net.createServer((socket)=>{
       }
     }else if(data.event === "ADD_REQUEST_ACCEPT"){
       AddressManager.add(socket.remoteAddress);
-      console.log(`${address}が追加されました`);
+      console.log(`${data.client.UserName}(${socket.remoteAddress})が追加されました`);
     }else if(data.event === "SEND_MESSAGE"){
       console.log(`${data.client.UserName}(${socket.remoteAddress}): ${data.data.content}`);
     }
