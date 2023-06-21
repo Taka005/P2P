@@ -24,9 +24,23 @@ const server = net.createServer((socket)=>{
       }catch{
         console.log("追加申請を承諾出来ませんでした");
       }
+    }else if(data.event === "DELETE_REQUEST"){
+      try{
+        const client = net.connect({ host: socket.remoteAddress, port: config.ClientPort });
+        client.write(DataBuilder("DELETE_REQUEST_ACCEPT"));
+        client.end();
+
+        AddressManager.delete(socket.remoteAddress);
+        console.log(`${data.client.UserName}(${socket.remoteAddress})が削除されました`);
+      }catch{
+        console.log("追加申請を承諾出来ませんでした");
+      }
     }else if(data.event === "ADD_REQUEST_ACCEPT"){
       AddressManager.add(socket.remoteAddress);
       console.log(`${data.client.UserName}(${socket.remoteAddress})が追加されました`);
+    }else if(data.event === "DELETE_REQUEST_ACCEPT"){
+      AddressManager.delete(socket.remoteAddress);
+      console.log(`${data.client.UserName}(${socket.remoteAddress})が削除されました`);
     }else if(data.event === "SEND_MESSAGE"){
       console.log(`${data.client.UserName}(${socket.remoteAddress}): ${data.data.content}`);
     }
@@ -46,6 +60,17 @@ function AddAddressRequest(address){
     client.end();
   }catch{
     console.log("指定されたアドレスに追加申請を送ることが出来ませんでした");
+  }
+}
+
+function DeleteAddressRequest(address){
+  if(!AddressManager.has(address)) return console.log("指定されたアドレスは登録されていません");
+  try{
+    const client = net.connect({ host: address, port: config.ClientPort });
+    client.write(DataBuilder("DELETE_REQUEST"));
+    client.end();
+  }catch{
+    console.log("指定されたアドレスに削除申請を送ることが出来ませんでした");
   }
 }
 
@@ -92,8 +117,10 @@ rl.on("line",(line)=>{
     rl.close();
   }else if(command.startsWith("add ")){
     AddAddressRequest(command.substring(4).trim());
+  }else if(command.startsWith("delete ")){
+    DeleteAddressRequest(command.substring(7).trim());
   }else if(command === "help"){
-    console.log("send: メッセージ送信, list: ノード一覧表示, add: 外部ノード追加, quit: 終了");
+    console.log("send: メッセージ送信, list: ノード一覧表示, add: 外部ノード追加, delete:外部ノードを削除, quit: 終了");
   }else{
     console.log("無効なコマンドです");
   }
