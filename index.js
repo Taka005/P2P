@@ -79,7 +79,7 @@ function DeleteAddressRequest(address){
 }
 
 function SendMessage(message){
-  AddressManager.data.forEach((address)=>{
+  AddressManager.data().forEach((address)=>{
     try{
       const client = net.connect({ host: address, port: config.ClientPort });
       client.write(DataBuilder("SEND_MESSAGE",{
