@@ -19,8 +19,10 @@ const server = net.createServer((socket)=>{
         client.write(DataBuilder("ADD_REQUEST_ACCEPT"));
         client.end();
 
-        AddressManager.add(socket.remoteAddress);
-        console.log(`${data.client.UserName}(${socket.remoteAddress})が追加されました`);
+        if(!AddressManager.has(socket.remoteAddress)){
+          AddressManager.add(socket.remoteAddress);
+          console.log(`${data.client.UserName}(${socket.remoteAddress})が追加されました`);
+        }
       }catch{
         console.log("追加申請を承諾出来ませんでした");
       }
@@ -30,8 +32,10 @@ const server = net.createServer((socket)=>{
         client.write(DataBuilder("DELETE_REQUEST_ACCEPT"));
         client.end();
 
-        AddressManager.delete(socket.remoteAddress);
-        console.log(`${data.client.UserName}(${socket.remoteAddress})が削除されました`);
+        if(AddressManager.has(socket.remoteAddress)){
+          AddressManager.delete(socket.remoteAddress);
+          console.log(`${data.client.UserName}(${socket.remoteAddress})が削除されました`);
+        }
       }catch{
         console.log("追加申請を承諾出来ませんでした");
       }
