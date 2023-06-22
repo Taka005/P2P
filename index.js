@@ -94,7 +94,7 @@ function SendMessage(message){
 
 function ShowAddresses(){
   console.log("接続中のノード一覧:");
-  AddressManager.data.forEach((address)=>{
+  AddressManager.data().forEach((address)=>{
     console.log(address);
   });
 }
