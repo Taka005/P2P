@@ -18,9 +18,10 @@ class P2P extends EventEmitter{
       socket.on("data",(_data)=>{
         const data = this.decode(_data.toString().trim(),config.key||"NONE");
         if(!data) return;
-      
-        if(data.event === "ADD_REQUEST"){
+        this.emit("data",data);
 
+        if(data.event === "ADD_REQUEST"){
+          this.emit()
         }else if(data.event === "DELETE_REQUEST"){
 
         }else if(data.event === "ADD_REQUEST_ACCEPT"){
@@ -34,11 +35,17 @@ class P2P extends EventEmitter{
     });      
   }
 
-  run(){
+  start(){
     this.server.listen(this.config.ServerPort,()=>{
       console.log("P2Pネットワークが開始されました");
       this.emit("start");
     });
+  }
+
+  stop(){
+    this.server.close();
+    console.log("P2Pネットワークを終了します");
+    this.emit("stop");
   }
 
   DataSend(address,event,data){
